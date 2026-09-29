@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Struktur Atom & Sistem Periodik</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        min-height: 100vh; color: #e0e0e0; padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { text-align: center; padding: 30px 20px; margin-bottom: 20px; }
+    header h1 {
+        font-size: 2.2em;
+        background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text; margin-bottom: 10px;
+    }
+    header p { color: #8899aa; font-size: 1.1em; }
+
+    .apersepsi {
+        background: linear-gradient(135deg, rgba(0,210,255,0.1), rgba(58,123,213,0.1));
+        border: 1px solid rgba(0,210,255,0.3); border-radius: 16px;
+        padding: 25px; margin-bottom: 30px;
+    }
+    .apersepsi h2 { color: #00d2ff; margin-bottom: 15px; font-size: 1.4em; }
+    .apersepsi p { line-height: 1.8; color: #b0c4de; margin-bottom: 10px; }
+    .apersepsi .highlight { color: #ffd700; font-weight: bold; }
+
+    .atom-simulation {
+        display: flex; justify-content: center; align-items: center;
+        padding: 30px; margin-bottom: 30px; background: rgba(0,0,0,0.3);
+        border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .atom-visual { position: relative; width: 320px; height: 320px; }
+    .nucleus {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 55px; height: 55px;
+        background: radial-gradient(circle, #ff6b6b, #ee5a24);
+        border-radius: 50%;
+        box-shadow: 0 0 30px rgba(255,107,107,0.8), 0 0 60px rgba(255,107,107,0.4);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.85em; font-weight: bold; color: white; z-index: 10;
+    }
+    .orbit {
+        position: absolute; top: 50%; left: 50%;
+        border: 1px dashed rgba(0,210,255,0.3); border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .electron {
+        position: absolute; width: 12px; height: 12px;
+        background: radial-gradient(circle, #00d2ff, #3a7bd5);
+        border-radius: 50%; box-shadow: 0 0 10px rgba(0,210,255,0.8);
+    }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn {
+        padding: 12px 24px; background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+        color: #8899aa; cursor: pointer; transition: all 0.3s ease;
+        font-size: 0.95em; font-weight: 500;
+    }
+    .tab-btn:hover { background: rgba(0,210,255,0.1); color: #00d2ff; border-color: rgba(0,210,255,0.3); }
+    .tab-btn.active {
+        background: linear-gradient(135deg, rgba(0,210,255,0.2), rgba(58,123,213,0.2));
+        color: #00d2ff; border-color: #00d2ff;
+        box-shadow: 0 0 20px rgba(0,210,255,0.2);
+    }
+    .tab-content { display: none; animation: fadeIn 0.4s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px; padding: 25px; margin-bottom: 20px;
+    }
+    .card h3 { color: #00d2ff; margin-bottom: 20px; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 8px; color: #b0c4de; font-size: 0.9em; font-weight: 500; }
+    .form-group input, .form-group select {
+        width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+        color: #e0e0e0; font-size: 1em; transition: all 0.3s ease; outline: none;
+    }
+    .form-group input:focus { border-color: #00d2ff; box-shadow: 0 0 15px rgba(0,210,255,0.2); }
+    .form-group input::placeholder { color: #556677; }
+
+    .btn {
+        padding: 12px 28px; background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+        border: none; border-radius: 10px; color: white; font-size: 1em;
+        font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,210,255,0.3);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0,210,255,0.5); }
+    .btn-secondary {
+        background: rgba(255,255,255,0.1); box-shadow: none;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.15); box-shadow: none; }
+
+    .result-box {
+        background: rgba(0,210,255,0.05); border: 1px solid rgba(0,210,255,0.2);
+        border-radius: 12px; padding: 20px; margin-top: 20px; display: none;
+    }
+    .result-box.show { display: block; animation: fadeIn 0.4s ease; }
+    .result-box h4 { color: #00d2ff; margin-bottom: 15px; font-size: 1.1em; }
+    .result-item {
+        display: flex; justify-content: space-between; padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .result-item:last-child { border-bottom: none; }
+    .result-item .label { color: #8899aa; }
+    .result-item .value { color: #00d2ff; font-weight: 600; font-family: 'Courier New', monospace; }
+
+    .shells-visual { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+    .shell-row { display: flex; align-items: center; gap: 12px; width: 100%; }
+    .shell-label { min-width: 70px; font-weight: 600; color: #ffd700; font-size: 1em; }
+    .shell-bar-container {
+        flex: 1; height: 28px; background: rgba(0,0,0,0.3);
+        border-radius: 14px; overflow: hidden; position: relative;
+    }
+    .shell-bar {
+        height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+        border-radius: 14px; transition: width 0.8s ease;
+        display: flex; align-items: center; justify-content: flex-end;
+        padding-right: 10px; font-size: 0.8em; font-weight: bold;
+        color: white; min-width: 30px;
+    }
+    .shell-electrons {
+        min-width: 50px; text-align: right;
+        font-family: 'Courier New', monospace; color: #00d2ff; font-weight: 600;
+    }
+
+    .quantum-display {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px; margin-top: 20px;
+    }
+    .quantum-card {
+        background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px; padding: 18px; text-align: center; transition: all 0.3s ease;
+    }
+    .quantum-card:hover { border-color: rgba(0,210,255,0.4); transform: translateY(-3px); }
+    .quantum-card .q-label { font-size: 1.5em; font-weight: bold; color: #ffd700; margin-bottom: 8px; }
+    .quantum-card .q-value {
+        font-size: 1.8em; font-weight: bold; color: #00d2ff;
+        font-family: 'Courier New', monospace; margin-bottom: 5px;
+    }
+    .quantum-card .q-desc { font-size: 0.8em; color: #8899aa; }
+
+    .isotop-row {
+        display: grid; grid-template-columns: 1fr 1fr auto auto;
+        gap: 10px; margin-bottom: 10px; align-items: center;
+    }
+    .isotop-row input {
+        width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+        color: #e0e0e0; font-size: 0.95em; outline: none;
+    }
+    .isotop-row input:focus { border-color: #00d2ff; }
+    .isotop-row .btn-remove {
+        padding: 10px 14px; background: rgba(255,107,107,0.2);
+        border: 1px solid rgba(255,107,107,0.4); border-radius: 8px;
+        color: #ff6b6b; cursor: pointer; font-size: 1em; transition: all 0.3s ease;
+    }
+    .isotop-row .btn-remove:hover { background: rgba(255,107,107,0.3); }
+
+    .atom-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .atom-table th {
+        padding: 12px; background: rgba(0,210,255,0.1); color: #00d2ff;
+        font-weight: 600; text-align: left;
+        border-bottom: 2px solid rgba(0,210,255,0.3); font-size: 0.9em;
+    }
+    .atom-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9em; }
+    .atom-table tr:hover td { background: rgba(0,210,255,0.05); }
+
+    .error-msg { color: #ff6b6b; font-size: 0.85em; margin-top: 8px; display: none; }
+    .error-msg.show { display: block; }
+
+    @media (max-width: 768px) {
+        header h1 { font-size: 1.5em; }
+        .tab-btn { padding: 10px 16px; font-size: 0.85em; }
+        .atom-visual { width: 240px; height: 240px; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>⚛️ Kalkulator Struktur Atom & Sistem Periodik</h1>
+        <p>Simulasi interaktif untuk memahami konfigurasi elektron, bilangan kuantum, dan massa atom</p>
+    </header>
+
+    <div class="apersepsi">
+        <h2>🌟 Apersepsi: Mengapa Atom Itu Penting?</h2>
+        <p>Bayangkan kamu sedang memecah sebuah <span class="highlight">lego</span> raksasa. Semakin kecil bagian yang kamu ambil, semakin sederhana bentuknya. Nah, atom adalah "lego terkecil" dari semua materi di alam semesta! Setiap atom memiliki <span class="highlight">inti atom (nukleus)</span> yang berisi proton dan neutron, serta <span class="highlight">elektron</span> yang mengorbit di sekitarnya seperti planet mengelilingi matahari.</p>
+        <p>Menariknya, cara elektron tersusun (<span class="highlight">konfigurasi elektron</span>) menentukan sifat kimia suatu unsur — apakah ia mudah bereaksi, berwarna, atau bahkan radioaktif. Dengan memahami struktur atom, kita bisa memprediksi bagaimana unsur-unsur berinteraksi dan mengapa <span class="highlight">sistem periodik</span> disusun seperti yang kita lihat di buku pelajaran.</p>
+        <p>Yuk, kita eksplorasi dengan kalkulator interaktif di bawah ini! 🚀</p>
+    </div>
+
+    <div class="atom-simulation">
+        <div class="atom-visual" id="atomVisual">
+            <div class="nucleus" id="nucleus">⚛️</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('konfigurasi', event)">📋 Konfigurasi Elektron</button>
+        <button class="tab-btn" onclick="switchTab('kuantum', event)">🔬 Bilangan Kuantum</button>
+        <button class="tab-btn" onclick="switchTab('massa', event)">⚖️ Massa Atom (Ar) & Molekul (Mr)</button>
+        <button class="tab-btn" onclick="switchTab('isotop', event)">🧪 Kelimpahan Isotop</button>
+    </div>
+
+    <!-- TAB 1 -->
+    <div class="tab-content active" id="tab-konfigurasi">
+        <div class="card">
+            <h3>📋 Konfigurasi Elektron per Kulit</h3>
+            <p style="color:#8899aa;margin-bottom:20px;font-size:0.9em;">Masukkan nomor atom (Z) untuk melihat distribusi elektron pada setiap kulit atom.</p>
+            <div class="form-group">
+                <label for="nomorAtomKonfig">Nomor Atom (Z)</label>
+                <input type="number" id="nomorAtomKonfig" placeholder="Contoh: 26" min="1" max="118" value="26">
+            </div>
+            <button class="btn" onclick="hitungKonfigurasi()">🔍 Hitung Konfigurasi</button>
+            <div class="error-msg" id="errorKonfig"></div>
+            <div class="result-box" id="resultKonfig">
+                <div id="konfigOutput"></div>
+                <div class="shells-visual" id="shellsVisual"></div>
+                <div style="margin-top:20px;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;font-size:0.85em;color:#8899aa;">
+                    <strong style="color:#ffd700;">💡 Catatan:</strong> Konfigurasi ini menggunakan aturan Aufbau dan prinsip eksklusi Pauli.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2 -->
+    <div class="tab-content" id="tab-kuantum">
+        <div class="card">
+            <h3>🔬 Bilangan Kuantum</h3>
+            <p style="color:#8899aa;margin-bottom:20px;font-size:0.9em;">Masukkan nomor atom untuk melihat bilangan kuantum elektron terakhirnya.</p>
+            <div class="form-group">
+                <label for="nomorAtomKuantum">Nomor Atom (Z)</label>
+                <input type="number" id="nomorAtomKuantum" placeholder="Contoh: 26" min="1" max="118" value="26">
+            </div>
+            <button class="btn" onclick="hitungKuantum()">🔍 Hitung Bilangan Kuantum</button>
+            <div class="error-msg" id="errorKuantum"></div>
+            <div class="result-box" id="resultKuantum">
+                <div id="quantumOutput"></div>
+                <div style="margin-top:20px;padding:15px;background:rgba(0,0,0,0.2);border-radius:10px;font-size:0.85em;color:#8899aa;">
+                    <strong style="color:#ffd700;">💡 Penjelasan:</strong><br>
+                    <strong>n</strong> (utama) = tingkat energi / kulit<br>
+                    <strong>l</strong> (azimut) = bentuk orbital (0=s, 1=p, 2=d, 3=f)<br>
+                    <strong>m</strong> (magnetik) = orientasi orbital<br>
+                    <strong>s</strong> (spin) = arah putaran elektron (+½ atau −½)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3 -->
+    <div class="tab-content" id="tab-massa">
+        <div class="card">
+            <h3>⚖️ Massa Atom Relatif (Ar) & Massa Molekul Relatif (Mr)</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div>
+                    <h4 style="color:#ffd700;margin-bottom:15px;font-size:0.95em;">📌 Massa Atom Relatif (Ar)</h4>
+                    <div class="form-group">
+                        <label for="nomorAtomAr">Nomor Atom (Z)</label>
+                        <input type="number" id="nomorAtomAr" placeholder="Contoh: 6" min="1" max="118" value="6">
+                    </div>
+                    <button class="btn" onclick="hitungAr()">Hitung Ar</button>
+                    <div class="result-box" id="resultAr">
+                        <div class="result-item"><span class="label">Nomor Atom (Z)</span><span class="value" id="arZ">-</span></div>
+                        <div class="result-item"><span class="label">Massa Atom Relatif (Ar)</span><span class="value" id="arValue">-</span></div>
+                        <div class="result-item"><span class="label">Nama Unsur</span><span class="value" id="arNama">-</span></div>
+                        <div class="result-item"><span class="label">Lambang</span><span class="value" id="arLambang">-</span></div>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color:#ffd700;margin-bottom:15px;font-size:0.95em;">🧬 Massa Molekul Relatif (Mr)</h4>
+                    <div class="form-group">
+                        <label for="rumusMolekul">Rumus Molekul</label>
+                        <input type="text" id="rumusMolekul" placeholder="Contoh: H2O, NaCl, C6H12O6" value="H2O">
+                    </div>
+                    <button class="btn" onclick="hitungMr()">Hitung Mr</button>
+                    <div class="result-box" id="resultMr">
+                        <div id="mrOutput"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4 -->
+    <div class="tab-content" id="tab-isotop">
+        <div class="card">
+            <h3>🧪 Kelimpahan Isotop & Massa Atom Rata-rata</h3>
+            <p style="color:#8899aa;margin-bottom:20px;font-size:0.9em;">Masukkan data isotop (massa dan kelimpahan dalam %) untuk menghitung Ar rata-rata.</p>
+            <div id="isotopContainer">
+                <div class="isotop-row">
+                    <input type="number" placeholder="Massa isotop (sma)" class="iso-massa" step="0.001" value="34.9689">
+                    <input type="number" placeholder="Kelimpahan (%)" class="iso-kelimpahan" step="0.001" value="75.77">
+                    <span style="color:#8899aa;font-size:0.85em;">%</span>
+                    <button class="btn-remove" onclick="removeIsotop(this)">✕</button>
+                </div>
+                <div class="isotop-row">
+                    <input type="number" placeholder="Massa isotop (sma)" class="iso-massa" step="0.001" value="36.9659">
+                    <input type="number" placeholder="Kelimpahan (%)" class="iso-kelimpahan" step="0.001" value="24.23">
+                    <span style="color:#8899aa;font-size:0.85em;">%</span>
+                    <button class="btn-remove" onclick="removeIsotop(this)">✕</button>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:15px;flex-wrap:wrap;">
+                <button class="btn" onclick="tambahIsotop()">➕ Tambah Isotop</button>
+                <button class="btn btn-secondary" onclick="hitungIsotop()">🔍 Hitung Ar Rata-rata</button>
+            </div>
+            <div class="error-msg" id="errorIsotop"></div>
+            <div class="result-box" id="resultIsotop">
+                <h4>Hasil Perhitungan Ar Rata-rata</h4>
+                <div class="result-item"><span class="label">Total Kelimpahan</span><span class="value" id="totalKelimpahan">-</span></div>
+                <div class="result-item"><span class="label">Ar Rata-rata</span><span class="value" id="arRataRata" style="font-size:1.3em;color:#ffd700;">-</span></div>
+                <div style="margin-top:15px;">
+                    <h4 style="color:#00d2ff;font-size:0.95em;margin-bottom:10px;">Rincian Perhitungan:</h4>
+                    <table class="atom-table" id="tabelIsotop">
+                        <thead>
+                            <tr><th>Isotop</th><th>Massa (sma)</th><th>Kelimpahan (%)</th><th>Kontribusi</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========== DATA UNSUR ==========
+const unsurData = {
+    1:{nama:'Hidrogen',lambang:'H',ar:1.008},2:{nama:'Helium',lambang:'He',ar:4.003},
+    3:{nama:'Litium',lambang:'Li',ar:6.94},4:{nama:'Berilium',lambang:'Be',ar:9.012},
+    5:{nama:'Boron',lambang:'B',ar:10.81},6:{nama:'Karbon',lambang:'C',ar:12.011},
+    7:{nama:'Nitrogen',lambang:'N',ar:14.007},8:{nama:'Oksigen',lambang:'O',ar:15.999},
+    9:{nama:'Fluor',lambang:'F',ar:18.998},10:{nama:'Neon',lambang:'Ne',ar:20.180},
+    11:{nama:'Natrium',lambang:'Na',ar:22.990},12:{nama:'Magnesium',lambang:'Mg',ar:24.305},
+    13:{nama:'Aluminium',lambang:'Al',ar:26.982},14:{nama:'Silikon',lambang:'Si',ar:28.085},
+    15:{nama:'Fosfor',lambang:'P',ar:30.974},16:{nama:'Sulfur',lambang:'S',ar:32.06},
+    17:{nama:'Klorin',lambang:'Cl',ar:35.45},18:{nama:'Argon',lambang:'Ar',ar:39.948},
+    19:{nama:'Kalium',lambang:'K',ar:39.098},20:{nama:'Kalsium',lambang:'Ca',ar:40.078},
+    21:{nama:'Skandium',lambang:'Sc',ar:44.956},22:{nama:'Titanium',lambang:'Ti',ar:47.867},
+    23:{nama:'Vanadium',lambang:'V',ar:50.942},24:{nama:'Kromium',lambang:'Cr',ar:51.996},
+    25:{nama:'Mangan',lambang:'Mn',ar:54.938},26:{nama:'Besi',lambang:'Fe',ar:55.845},
+    27:{nama:'Kobalt',lambang:'Co',ar:58.933},28:{nama:'Nikel',lambang:'Ni',ar:58.693},
+    29:{nama:'Tembaga',lambang:'Cu',ar:63.546},30:{nama:'Seng',lambang:'Zn',ar:65.38},
+    31:{nama:'Galium',lambang:'Ga',ar:69.723},32:{nama:'Germanium',lambang:'Ge',ar:72.630},
+    33:{nama:'Arsen',lambang:'As',ar:74.922},34:{nama:'Selenium',lambang:'Se',ar:78.971},
+    35:{nama:'Bromin',lambang:'Br',ar:79.904},36:{nama:'Kripton',lambang:'Kr',ar:83.798},
+    37:{nama:'Rubidium',lambang:'Rb',ar:85.468},38:{nama:'Stronsium',lambang:'Sr',ar:87.62},
+    39:{nama:'Itrium',lambang:'Y',ar:88.906},40:{nama:'Zirkonium',lambang:'Zr',ar:91.224},
+    41:{nama:'Niobium',lambang:'Nb',ar:92.906},42:{nama:'Molibdenum',lambang:'Mo',ar:95.95},
+    43:{nama:'Teknesium',lambang:'Tc',ar:98},44:{nama:'Rutenium',lambang:'Ru',ar:101.07},
+    45:{nama:'Rodhium',lambang:'Rh',ar:102.91},46:{nama:'Paladium',lambang:'Pd',ar:106.42},
+    47:{nama:'Perak',lambang:'Ag',ar:107.87},48:{nama:'Kadmium',lambang:'Cd',ar:112.41},
+    49:{nama:'Indium',lambang:'In',ar:114.82},50:{nama:'Timah',lambang:'Sn',ar:118.71},
+    51:{nama:'Antimon',lambang:'Sb',ar:121.76},52:{nama:'Telurium',lambang:'Te',ar:127.60},
+    53:{nama:'Iodin',lambang:'I',ar:126.90},54:{nama:'Xenon',lambang:'Xe',ar:131.29},
+    55:{nama:'Sesium',lambang:'Cs',ar:132.91},56:{nama:'Barium',lambang:'Ba',ar:137.33},
+    57:{nama:'Lantanum',lambang:'La',ar:138.91},58:{nama:'Serium',lambang:'Ce',ar:140.12},
+    59:{nama:'Praseodimium',lambang:'Pr',ar:140.91},60:{nama:'Neodimium',lambang:'Nd',ar:144.24},
+    61:{nama:'Prometium',lambang:'Pm',ar:145},62:{nama:'Samarium',lambang:'Sm',ar:150.36},
+    63:{nama:'Europium',lambang:'Eu',ar:151.96},64:{nama:'Gadolinium',lambang:'Gd',ar:157.25},
+    65:{nama:'Terbium',lambang:'Tb',ar:158.93},66:{nama:'Disprosium',lambang:'Dy',ar:162.50},
+    67:{nama:'Holmium',lambang:'Ho',ar:164.93},68:{nama:'Erbium',lambang:'Er',ar:167.26},
+    69:{nama:'Tulium',lambang:'Tm',ar:168.93},70:{nama:'Iterbium',lambang:'Yb',ar:173.05},
+    71:{nama:'Lutesium',lambang:'Lu',ar:174.97},72:{nama:'Hafnium',lambang:'Hf',ar:178.49},
+    73:{nama:'Tantalum',lambang:'Ta',ar:180.95},74:{nama:'Wolfram',lambang:'W',ar:183.84},
+    75:{nama:'Renium',lambang:'Re',ar:186.21},76:{nama:'Osmium',lambang:'Os',ar:190.23},
+    77:{nama:'Iridium',lambang:'Ir',ar:192.22},78:{nama:'Platina',lambang:'Pt',ar:195.08},
+    79:{nama:'Emas',lambang:'Au',ar:196.97},80:{nama:'Raksa',lambang:'Hg',ar:200.59},
+    81:{nama:'Talium',lambang:'Tl',ar:204.38},82:{nama:'Timbal',lambang:'Pb',ar:207.2},
+    83:{nama:'Bismut',lambang:'Bi',ar:208.98},84:{nama:'Polonium',lambang:'Po',ar:209},
+    85:{nama:'Astatin',lambang:'At',ar:210},86:{nama:'Radon',lambang:'Rn',ar:222},
+    87:{nama:'Fransium',lambang:'Fr',ar:223},88:{nama:'Radium',lambang:'Ra',ar:226},
+    89:{nama:'Aktinium',lambang:'Ac',ar:227},90:{nama:'Torium',lambang:'Th',ar:232.04},
+    91:{nama:'Protaktinium',lambang:'Pa',ar:231.04},92:{nama:'Uranium',lambang:'U',ar:238.03},
+    93:{nama:'Neptunium',lambang:'Np',ar:237},94:{nama:'Plutonium',lambang:'Pu',ar:244},
+    95:{nama:'Amerisium',lambang:'Am',ar:243},96:{nama:'Kurium',lambang:'Cm',ar:247},
+    97:{nama:'Berkelium',lambang:'Bk',ar:247},98:{nama:'Kalifornium',lambang:'Cf',ar:251},
+    99:{nama:'Einsteinium',lambang:'Es',ar:252},100:{nama:'Fermium',lambang:'Fm',ar:257},
+    101:{nama:'Mendelevium',lambang:'Md',ar:258},102:{nama:'Nobelium',lambang:'No',ar:259},
+    103:{nama:'Lawrensium',lambang:'Lr',ar:262},104:{nama:'Rutherfordium',lambang:'Rf',ar:267},
+    105:{nama:'Dubnium',lambang:'Db',ar:268},106:{nama:'Seaborgium',lambang:'Sg',ar:269},
+    107:{nama:'Bohrium',lambang:'Bh',ar:270},108:{nama:'Hassium',lambang:'Hs',ar:269},
+    109:{nama:'Meitnerium',lambang:'Mt',ar:278},110:{nama:'Darmstadtium',lambang:'Ds',ar:281},
+    111:{nama:'Roentgenium',lambang:'Rg',ar:282},112:{nama:'Kopernisium',lambang:'Cn',ar:285},
+    113:{nama:'Nihonium',lambang:'Nh',ar:286},114:{nama:'Flerovium',lambang:'Fl',ar:289},
+    115:{nama:'Moskovium',lambang:'Mc',ar:290},116:{nama:'Livermorium',lambang:'Lv',ar:293},
+    117:{nama:'Tenesin',lambang:'Ts',ar:294},118:{nama:'Oganeson',lambang:'Og',ar:294}
+};
+
+const ORBITAL_ORDER = [
+    {n:1,l:'s',lNum:0,cap:2},{n:2,l:'s',lNum:0,cap:2},{n:2,l:'p',lNum:1,cap:6},
+    {n:3,l:'s',lNum:0,cap:2},{n:3,l:'p',lNum:1,cap:6},{n:4,l:'s',lNum:0,cap:2},
+    {n:3,l:'d',lNum:2,cap:10},{n:4,l:'p',lNum:1,cap:6},{n:5,l:'s',lNum:0,cap:2},
+    {n:4,l:'d',lNum:2,cap:10},{n:5,l:'p',lNum:1,cap:6},{n:6,l:'s',lNum:0,cap:2},
+    {n:4,l:'f',lNum:3,cap:14},{n:5,l:'d',lNum:2,cap:10},{n:6,l:'p',lNum:1,cap:6},
+    {n:7,l:'s',lNum:0,cap:2},{n:5,l:'f',lNum:3,cap:14},{n:6,l:'d',lNum:2,cap:10},
+    {n:7,l:'p',lNum:1,cap:6}
+];
+
+const NOBLE_GASES = [
+    {z:2,symbol:'He',orbitals:['1s2']},
+    {z:10,symbol:'Ne',orbitals:['1s2','2s2','2p6']},
+    {z:18,symbol:'Ar',orbitals:['1s2','2s2','2p6','3s2','3p6']},
+    {z:36,symbol:'Kr',orbitals:['1s2','2s2','2p6','3s2','3p6','4s2','3d10','4p6']},
+    {z:54,symbol:'Xe',orbitals:['1s2','2s2','2p6','3s2','3p6','4s2','3d10','4p6','5s2','4d10','5p6']},
+    {z:86,symbol:'Rn',orbitals:['1s2','2s2','2p6','3s2','3p6','4s2','3d10','4p6','5s2','4d10','5p6','6s2','4f14','5d10','6p6']}
+];
+
+function toSup(s){
+    const map={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻'};
+    return String(s).split('').map(c=>map[c]||c).join('');
+}
+function fmtOrb(s){ return s.replace(/(\d+)$/,m=>toSup(m)); }
+
+// ========== TAB ==========
+function switchTab(name, ev){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    ev.currentTarget.classList.add('active');
+    document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ========== KONFIGURASI ==========
+function hitungKonfigurasi(){
+    const Z = parseInt(document.getElementById('nomorAtomKonfig').value);
+    const errorEl = document.getElementById('errorKonfig');
+    const resultEl = document.getElementById('resultKonfig');
+
+    if(!Z || Z<1 || Z>118){
+        errorEl.textContent='Masukkan nomor atom yang valid (1-118)';
+        errorEl.classList.add('show');
+        resultEl.classList.remove('show');
+        return;
+    }
+    errorEl.classList.remove('show');
+
+    const unsur = unsurData[Z];
+    let remaining = Z;
+    const configOrbitals = [];
+    const shells = {};
+
+    for(const orb of ORBITAL_ORDER){
+        if(remaining<=0) break;
+        const fill = Math.min(remaining, orb.cap);
+        configOrbitals.push(`${orb.n}${orb.l}${fill}`);
+        shells[orb.n] = (shells[orb.n]||0) + fill;
+        remaining -= fill;
+    }
+
+    const configFull = configOrbitals.map(fmtOrb).join(' ');
+    const notasi = toSup(Z)+unsur.lambang;
+    const notasiSingkat = getNotasiSingkat(Z, unsur.lambang);
+
+    let html = `
+        <div style="background:rgba(0,0,0,0.25);border-radius:12px;padding:20px;margin-bottom:20px;text-align:center;">
+            <div style="font-size:0.85em;color:#8899aa;margin-bottom:8px;">Unsur yang dihitung:</div>
+            <div style="font-size:2em;font-weight:bold;color:#ffd700;letter-spacing:1px;">${notasi}</div>
+            <div style="font-size:1.15em;color:#00d2ff;margin-top:5px;">${unsur.nama}</div>
+            <div style="font-size:0.85em;color:#8899aa;margin-top:5px;">
+                Nomor Atom (Z) = ${Z} &nbsp;|&nbsp; Jumlah Elektron = ${Z} &nbsp;|&nbsp; Ar = ${unsur.ar.toFixed(3)}
+            </div>
+        </div>
+        <div style="font-size:1em;margin-bottom:12px;color:#b0c4de;">
+            <strong style="color:#ffd700;">📌 Konfigurasi Elektron (Aufbau):</strong>
+        </div>
+        <div style="color:#00d2ff;font-family:'Courier New',monospace;font-size:1.15em;background:rgba(0,0,0,0.3);padding:15px;border-radius:10px;word-break:break-word;line-height:1.6;margin-bottom:20px;">
+            ${notasi} : ${configFull}
+        </div>
+        <div style="font-size:1em;margin-bottom:12px;color:#b0c4de;">
+            <strong style="color:#ffd700;">📌 Konfigurasi per Kulit:</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:10px;color:#00d2ff;font-family:'Courier New',monospace;font-size:1em;margin-bottom:20px;">
+            ${Object.entries(shells).sort((a,b)=>a[0]-b[0]).map(([k,v])=>`${notasi} → Kulit ${k}: ${v} e⁻`).join('<br>')}
+        </div>
+        <div style="background:rgba(0,0,0,0.25);padding:15px;border-radius:10px;color:#b0c4de;font-size:0.95em;">
+            <strong style="color:#ffd700;">📌 Notasi Singkat (Gas Mulia):</strong><br>
+            <span style="color:#00d2ff;font-family:'Courier New',monospace;font-size:1.05em;">${notasiSingkat}</span>
+        </div>
+    `;
+    document.getElementById('konfigOutput').innerHTML = html;
+
+    let shellVis = '';
+    const maxE = Math.max(...Object.values(shells), 1);
+    for(const [shell, count] of Object.entries(shells).sort((a,b)=>a[0]-b[0])){
+        const pct = (count/maxE)*100;
+        shellVis += `
+            <div class="shell-row">
+                <span class="shell-label">Kulit ${shell}</span>
+                <div class="shell-bar-container"><div class="shell-bar" style="width:${pct}%">${count}</div></div>
+                <span class="shell-electrons">${count}e⁻</span>
+            </div>`;
+    }
+    document.getElementById('shellsVisual').innerHTML = shellVis;
+
+    updateAtomVisual(shells, Z, unsur.lambang);
+    resultEl.classList.add('show');
+}
+
+function getNotasiSingkat(Z, lambang){
+    const notasi = toSup(Z)+lambang;
+    if(Z===1) return `${notasi} : 1s¹`;
+    if(Z===2) return `${notasi} : 1s² (gas mulia)`;
+
+    let noble=null;
+    for(let i=NOBLE_GASES.length-1;i>=0;i--){
+        if(NOBLE_GASES[i].z < Z){ noble=NOBLE_GASES[i]; break; }
+    }
+    if(!noble) return `${notasi} : ${getFullConfig(Z)}`;
+
+    let remaining = Z - noble.z;
+    const sisaOrb = [];
+    // Kumpulkan orbital yang belum terisi penuh oleh gas mulia
+    const filledSet = new Set(noble.orbitals.map(o => o.replace(/\d+$/,'')));
+
+    // Tentukan posisi setelah gas mulia berdasarkan urutan Aufbau
+    let nobleIndex = -1;
+    for(let i=0;i<ORBITAL_ORDER.length;i++){
+        const o = ORBITAL_ORDER[i];
+        const key = `${o.n}${o.l}`;
+        if(noble.orbitals.some(no => no.startsWith(key) && parseInt(no.replace(/^\d+[spdf]/,''))===o.cap)){
+            nobleIndex = i;
+        }
+    }
+
+    for(let i=nobleIndex+1;i<ORBITAL_ORDER.length;i++){
+        if(remaining<=0) break;
+        const o = ORBITAL_ORDER[i];
+        const fill = Math.min(remaining, o.cap);
+        sisaOrb.push(`${o.n}${o.l}${fill}`);
+        remaining -= fill;
+    }
+
+    if(sisaOrb.length===0) return `${notasi} : [${noble.symbol}]`;
+    return `${notasi} : [${noble.symbol}] ${sisaOrb.map(fmtOrb).join(' ')}`;
+}
+
+function getFullConfig(Z){
+    let remaining = Z;
+    const orbitals = [];
+    for(const o of ORBITAL_ORDER){
+        if(remaining<=0) break;
+        const fill = Math.min(remaining, o.cap);
+        orbitals.push(`${o.n}${o.l}${fill}`);
+        remaining -= fill;
+    }
+    return orbitals.map(fmtOrb).join(' ');
+}
+
+function updateAtomVisual(shells, Z, lambang){
+    const av = document.getElementById('atomVisual');
+    const nuc = document.getElementById('nucleus');
+
+    nuc.innerHTML = `<div style="text-align:center;line-height:1.1;">
+        <div style="font-size:0.7em;color:#fff;">${Z}</div>
+        <div style="font-size:1.05em;font-weight:bold;color:#fff;">${lambang||'?'}</div>
+    </div>`;
+
+    av.querySelectorAll('.orbit, .electron, .shell-tag').forEach(el=>el.remove());
+
+    const shellNames = Object.keys(shells).sort((a,b)=>a-b);
+    const maxR = 140, minR = 55;
+
+    shellNames.forEach((shell, idx)=>{
+        const count = shells[shell];
+        const r = shellNames.length===1 ? minR : minR + (idx/(shellNames.length-1))*(maxR-minR);
+
+        const orbit = document.createElement('div');
+        orbit.className = 'orbit';
+        orbit.style.width = (r*2)+'px';
+        orbit.style.height = (r*2)+'px';
+        av.appendChild(orbit);
+
+        const tag = document.createElement('div');
+        tag.className = 'shell-tag';
+        tag.style.cssText = `position:absolute;top:calc(50% - ${r}px - 14px);left:50%;transform:translateX(-50%);font-size:0.65em;color:#ffd700;font-weight:bold;background:rgba(0,0,0,0.6);padding:1px 6px;border-radius:4px;white-space:nowrap;z-index:5;`;
+        tag.textContent = `Kulit ${shell} (${count}e⁻)`;
+        av.appendChild(tag);
+
+        const show = Math.min(count, 12);
+        for(let e=0;e<show;e++){
+            const angle = (e/show)*2*Math.PI + (idx*0.5);
+            const el = document.createElement('div');
+            el.className = 'electron';
+            el.style.left = `calc(50% + ${r*Math.cos(angle)}px - 6px)`;
+            el.style.top = `calc(50% + ${r*Math.sin(angle)}px - 6px)`;
+            av.appendChild(el);
+        }
+    });
+}
+
+// ========== BILANGAN KUANTUM ==========
+function hitungKuantum(){
+    const Z = parseInt(document.getElementById('nomorAtomKuantum').value);
+    const errorEl = document.getElementById('errorKuantum');
+    const resultEl = document.getElementById('resultKuantum');
+
+    if(!Z || Z<1 || Z>118){
+        errorEl.textContent='Masukkan nomor atom yang valid (1-118)';
+        errorEl.classList.add('show');
+        resultEl.classList.remove('show');
+        return;
+    }
+    errorEl.classList.remove('show');
+
+    let remaining = Z;
+    let lastOrb = null, lastFill = 0;
+    for(const o of ORBITAL_ORDER){
+        if(remaining<=0) break;
+        const fill = Math.min(remaining, o.cap);
+        lastOrb = o; lastFill = fill;
+        remaining -= fill;
+    }
+
+    const n = lastOrb.n, l = lastOrb.lNum;
+    let m, s;
+
+    if(l===0){
+        m = 0;
+        s = (lastFill===1) ? +0.5 : -0.5;
+    } else if(l===1){
+        const half = 3;
+        if(lastFill<=half){ m = lastFill-2; s = +0.5; }
+        else { m = (lastFill-half-1)-1; s = -0.5; }
+    } else if(l===2){
+        const half = 5;
+        if(lastFill<=half){ m = lastFill-3; s = +0.5; }
+        else { m = (lastFill-half-1)-2; s = -0.5; }
+    } else {
+        const half = 7;
+        if(lastFill<=half){ m = lastFill-4; s = +0.5; }
+        else { m = (lastFill-half-1)-3; s = -0.5; }
+    }
+
+    const unsur = unsurData[Z];
+    const notasi = toSup(Z)+unsur.lambang;
+
+    const q = [
+        {label:'n', value:n, desc:`Bilangan kuantum utama — kulit ke-${n}`},
+        {label:'l', value:l, desc:`Bilangan kuantum azimut — orbital ${lastOrb.l} (${l})`},
+        {label:'m', value:m, desc:'Bilangan kuantum magnetik — orientasi orbital'},
+        {label:'s', value:s>0?'+½':'−½', desc:'Bilangan kuantum spin'}
+    ];
+
+    let html = `
+        <div style="background:rgba(0,0,0,0.25);border-radius:12px;padding:15px;margin-bottom:20px;text-align:center;">
+            <div style="font-size:1.6em;font-weight:bold;color:#ffd700;">${notasi}</div>
+            <div style="font-size:1em;color:#00d2ff;margin-top:4px;">${unsur.nama}</div>
+            <div style="font-size:0.85em;color:#8899aa;margin-top:6px;">
+                Elektron terakhir di orbital <strong style="color:#ffd700;">${n}${lastOrb.l}${toSup(lastFill)}</strong>
+            </div>
+        </div>
+        <div class="quantum-display">`;
+    q.forEach(x=>{
+        html += `<div class="quantum-card">
+            <div class="q-label">${x.label}</div>
+            <div class="q-value">${x.value}</div>
+            <div class="q-desc">${x.desc}</div>
+        </div>`;
+    });
+    html += `</div>`;
+
+    document.getElementById('quantumOutput').innerHTML = html;
+    resultEl.classList.add('show');
+}
+
+// ========== Ar ==========
+function hitungAr(){
+    const Z = parseInt(document.getElementById('nomorAtomAr').value);
+    const resultEl = document.getElementById('resultAr');
+    if(!Z || Z<1 || Z>118){ alert('Masukkan nomor atom yang valid (1-118)'); return; }
+    const u = unsurData[Z];
+    document.getElementById('arZ').textContent = Z;
+    document.getElementById('arValue').textContent = u.ar.toFixed(3);
+    document.getElementById('arNama').textContent = u.nama;
+    document.getElementById('arLambang').textContent = u.lambang;
+    resultEl.classList.add('show');
+}
+
+// ========== Mr ==========
+function hitungMr(){
+    const rumus = document.getElementById('rumusMolekul').value.trim();
+    const resultEl = document.getElementById('resultMr');
+    if(!rumus){ alert('Masukkan rumus molekul'); return; }
+
+    const symbolMap = {};
+    for(let z in unsurData) symbolMap[unsurData[z].lambang] = unsurData[z].ar;
+
+    function parseSimple(f){
+        const res = {};
+        const rx = /([A-Z][a-z]?)(\d*)/g;
+        let m;
+        while((m = rx.exec(f)) !== null){
+            const sym = m[1];
+            const cnt = m[2] ? parseInt(m[2]) : 1;
+            res[sym] = (res[sym]||0) + cnt;
+        }
+        return res;
+    }
+    function parseFormula(f){
+        const bm = f.match(/\(([^)]+)\)(\d*)/);
+        if(bm){
+            const inner = parseSimple(bm[1]);
+            const mult = bm[2] ? parseInt(bm[2]) : 1;
+            const before = f.substring(0, bm.index);
+            const after = f.substring(bm.index + bm[0].length);
+            const res = {};
+            if(before) Object.assign(res, parseSimple(before));
+            for(const sym in inner) res[sym] = (res[sym]||0) + inner[sym]*mult;
+            if(after){
+                const afterRes = parseFormula(after);
+                for(const sym in afterRes) res[sym] = (res[sym]||0) + afterRes[sym];
+            }
+            return res;
+        }
+        return parseSimple(f);
+    }
+
+    const atoms = parseFormula(rumus);
+    if(Object.keys(atoms).length===0){ alert('Rumus tidak valid'); return; }
+
+    let totalMr = 0;
+    let html = '<table class="atom-table"><thead><tr><th>Unsur</th><th>Jumlah</th><th>Ar</th><th>Subtotal</th></tr></thead><tbody>';
+
+    for(const sym in atoms){
+        const ar = symbolMap[sym];
+        if(ar===undefined){ alert(`Unsur "${sym}" tidak ditemukan`); return; }
+        const cnt = atoms[sym];
+        const sub = ar*cnt;
+        totalMr += sub;
+        html += `<tr>
+            <td><strong style="color:#ffd700;">${sym}</strong></td>
+            <td>${cnt}</td>
+            <td>${ar.toFixed(3)}</td>
+            <td style="color:#00d2ff;font-weight:600;">${sub.toFixed(3)}</td>
+        </tr>`;
+    }
+    html += `</tbody></table>`;
+    html += `<div style="margin-top:15px;padding:15px;background:rgba(0,210,255,0.1);border-radius:10px;text-align:center;">
+        <span style="color:#8899aa;">Mr dari ${rumus}:</span>
+        <div style="font-size:2em;font-weight:bold;color:#ffd700;margin-top:5px;">${totalMr.toFixed(3)}</div>
+    </div>`;
+
+    document.getElementById('mrOutput').innerHTML = html;
+    resultEl.classList.add('show');
+}
+
+// ========== ISOTOP ==========
+function tambahIsotop(){
+    const c = document.getElementById('isotopContainer');
+    const row = document.createElement('div');
+    row.className = 'isotop-row';
+    row.innerHTML = `
+        <input type="number" placeholder="Massa isotop (sma)" class="iso-massa" step="0.001">
+        <input type="number" placeholder="Kelimpahan (%)" class="iso-kelimpahan" step="0.001">
+        <span style="color:#8899aa;font-size:0.85em;">%</span>
+        <button class="btn-remove" onclick="removeIsotop(this)">✕</button>`;
+    c.appendChild(row);
+}
+function removeIsotop(b){
+    const c = document.getElementById('isotopContainer');
+    if(c.children.length>1) b.closest('.isotop-row').remove();
+    else alert('Minimal harus ada satu isotop');
+}
+function hitungIsotop(){
+    const masses = document.querySelectorAll('.iso-massa');
+    const abuns = document.querySelectorAll('.iso-kelimpahan');
+    const errorEl = document.getElementById('errorIsotop');
+    const resultEl = document.getElementById('resultIsotop');
+
+    let totalAb = 0, ar = 0;
+    const data = [];
+
+    for(let i=0;i<masses.length;i++){
+        const mass = parseFloat(masses[i].value);
+        const ab = parseFloat(abuns[i].value);
+        if(isNaN(mass)||isNaN(ab)){
+            errorEl.textContent='Semua field harus diisi';
+            errorEl.classList.add('show');
+            resultEl.classList.remove('show');
+            return;
+        }
+        totalAb += ab;
+        ar += mass * (ab/100);
+        data.push({mass, ab, contrib: mass*(ab/100)});
+    }
+
+    if(Math.abs(totalAb-100)>0.01){
+        errorEl.textContent=`Total kelimpahan harus 100%. Saat ini: ${totalAb.toFixed(2)}%`;
+        errorEl.classList.add('show');
+        resultEl.classList.remove('show');
+        return;
+    }
+    errorEl.classList.remove('show');
+
+    document.getElementById('totalKelimpahan').textContent = totalAb.toFixed(2)+'%';
+    document.getElementById('arRataRata').textContent = ar.toFixed(4)+' sma';
+
+    let tbody = document.querySelector('#tabelIsotop tbody');
+    tbody.innerHTML = '';
+    data.forEach((d,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>Isotop ${i+1}</td><td>${d.mass.toFixed(4)}</td><td>${d.ab.toFixed(2)}%</td><td style="color:#00d2ff;">${d.contrib.toFixed(4)}</td>`;
+        tbody.appendChild(tr);
+    });
+    const trT = document.createElement('tr');
+    trT.style.fontWeight = 'bold';
+    trT.innerHTML = `<td>Total</td><td>-</td><td style="color:#ffd700;">${totalAb.toFixed(2)}%</td><td style="color:#ffd700;">${ar.toFixed(4)}</td>`;
+    tbody.appendChild(trT);
+
+    resultEl.classList.add('show');
+}
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', function(){
+    hitungKonfigurasi();
+});
+</script>
+</body>
+</html>
